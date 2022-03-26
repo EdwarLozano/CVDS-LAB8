@@ -77,7 +77,7 @@ public class MyBatisExample {
             TipoItemMapper tipoItemMapper = sqlss.getMapper(TipoItemMapper.class);
 
             /**CONSULTAR CLIENTES */
-            //System.out.println(cm.consultarClientes());
+           // System.out.println(cm.consultarClientes());
 
             /**CONSULTAR CLIENTE */
             //System.out.println(cm.consultarCliente(100));
@@ -86,14 +86,14 @@ public class MyBatisExample {
             //System.out.println(itemMapper.consultarItems());
 
             /** CONSULTAR ITEM */
-            //System.out.println(itemMapper.consultarItem(15));
+            //System.out.println(itemMapper.consultarItem(21677088));
             
             /** AGREGAR TIPO ITEM */
             //tipoItemMapper.addTipoItem("La Lechona Mecanica");
 
-            TipoItem tipo = tipoItemMapper.getTipoItem(2143447);
-            itemMapper.insertarItem(new Item(tipo,21677088, "CR7", "SIUUUUU", new Date(), 99999, "FORMATORENTA", "GOAT"));
-            cm.agregarItemRentadoACliente(1, 21677088, new Date(), new Date());
+            //TipoItem tipo = tipoItemMapper.getTipoItem(2143447);
+            //itemMapper.insertarItem(new Item(tipo,21677088, "CR7", "SIUUUUU", new Date(), 99999, "FORMATORENTA", "GOAT"));
+            //cm.agregarItemRentadoACliente(1, 21677088, new Date(), new Date());
 
             sqlss.commit();
         

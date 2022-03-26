@@ -202,6 +202,8 @@ En este laboratorio se utilizará un 'framework' de persistencia. La base de dat
 
 2. Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
 
+![](img/Picture14.png)
+
 3. Configure en el XML correspondiente, la operación agregarItemRentadoACliente. Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
 
 4. Configure en el XML correspondiente (en este caso ItemMapper.xml) la operación 'insertarItem(Item it). Para este tenga en cuenta:
@@ -215,5 +217,9 @@ En este laboratorio se utilizará un 'framework' de persistencia. La base de dat
 		<association ... resultMap='edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemMapper.ItemResult'></association> 
 	</resultMap>
 	```
-	
-	Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
+![](img/Picture12.png)
+![](img/Picture10.png)
+![](img/Picture13.png)
+![](img/Picture11.png)
+
+Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
