@@ -12,7 +12,8 @@
 5.  Revise la documentación de ‘[PreparedStatement](http://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html)’, del API JDBC.
 6.  En la clase **JDBCExample** juste los parámetros de conexión a la base de datos con los datos reales:
     -   ```
-        Url: jdbc:mysql://desarrollo.is.escuelaing.edu.co:3306/bdpruebaDriver: com.mysql.jdbc.Driver
+        Url: jdbc:mysql://desarrollo.is.escuelaing.edu.co:3306/bdprueba 
+		Driver: com.mysql.jdbc.Driver
 		Usuario: bdprueba
 		Contraseña: prueba2019
         ```
@@ -95,6 +96,8 @@ En este laboratorio se utilizará un 'framework' de persistencia. La base de dat
         left join VI_ITEMS as i on ir.ITEMS_id=i.id 
         left join VI_TIPOITEM as ti on i.TIPOITEM_id=ti.id 
 	```
+
+![](img/Picture9.png)
 
 3. Abra el archivo XML en el cual se definirán los parámetros para que MyBatis genere el 'mapper' de Cliente (ClienteMapper.xml). Ahora, mapee un elemento de tipo \<select> al método 'consultarClientes':
 
