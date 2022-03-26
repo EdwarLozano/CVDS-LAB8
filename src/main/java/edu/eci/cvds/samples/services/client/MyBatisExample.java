@@ -82,16 +82,18 @@ public class MyBatisExample {
             /**CONSULTAR CLIENTE */
             //System.out.println(cm.consultarCliente(100));
 
+            /** CONSULTAR ITEMS */
             //System.out.println(itemMapper.consultarItems());
 
-            //System.out.println(itemMapper.consultarItem(2));
+            /** CONSULTAR ITEM */
+            //System.out.println(itemMapper.consultarItem(15));
             
-            
+            /** AGREGAR TIPO ITEM */
+            //tipoItemMapper.addTipoItem("La Lechona Mecanica");
 
-            //tipoItemMapper.addTipoItem("");
-            //TipoItem tipo = tipoItemMapper.getTipoItem(1);
-            //itemMapper.insertarItem(new Item(tipo, , "", "", new Date(), 10000, "", ""));
-            //cm.agregarItemRentadoACliente(1, 1, new Date(), new Date());
+            TipoItem tipo = tipoItemMapper.getTipoItem(2143447);
+            itemMapper.insertarItem(new Item(tipo,21677088, "CR7", "SIUUUUU", new Date(), 99999, "FORMATORENTA", "GOAT"));
+            cm.agregarItemRentadoACliente(1, 21677088, new Date(), new Date());
 
             sqlss.commit();
         

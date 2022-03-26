@@ -4,8 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemMapper">
-
- <resultMap type='Item' id='ItemResult'>
+  <resultMap type='Item' id='ItemResult'>
     <id property='id' column='id'/>
     <result property='nombre' column='nombre'/>
     <result property='descripcion' column='descripcion'/>
@@ -16,16 +15,16 @@
     <association property="tipo" javaType="TipoItem"/>
   </resultMap>
   
-  <insert parameterType="map" id="insertarItem">
+  <insert parameterType="Item" id="insertarItem" >
     insert into VI_ITEMS values(
-        #{item.id}, 
-        #{item.nombre}, 
-        #{item.descripcion}, 
-        #{item.fechaLanzamiento},
-        #{item.tarifaxDia},
-        #{item.formatoRenta},
-        #{item.genero},
-        #{item.tipo.id}
+        #{id}, 
+        #{nombre}, 
+        #{descripcion}, 
+        #{fechaLanzamiento},
+        #{tarifaxDia},
+        #{formatoRenta},
+        #{genero},
+        #{tipo.id}
       )
   </insert>
 
@@ -36,6 +35,4 @@
   <select parameterType="map" id="consultarItems" resultMap="ItemResult">
     select * from VI_ITEMS
   </select>  
-    
-    
 </mapper>
