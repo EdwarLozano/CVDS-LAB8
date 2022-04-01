@@ -1,6 +1,9 @@
 # Laboratorio 8 - MyBatis-Guice-PrimeFaces - 2022-1
 
 ### Escuela Colombiana de Ingeniería
+#### Integrantes 
+- Santiago Fetecua
+- Edwar Lozano
 
 ### Ciclos de Vida del Desarrollo de Software - CVDS
 
