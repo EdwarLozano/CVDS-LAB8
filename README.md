@@ -1,225 +1,817 @@
+# Laboratorio 8 - MyBatis-Guice-PrimeFaces - 2022-1
+
 ### Escuela Colombiana de Ingeniería
-### Ciclos de Vida del desarrollo de Software – CVDS
-### LABORATORIO 7
-#### SECCIÓN I. - INTRODUCCIÓN A JDBC
-1.  Clonar el proyecto [MyBatis_Introduction_VideoRental de GitHub](https://github.com/PDSW-ECI/MyBatis_Introduction_VideoRental) donde se realizará la implementación completa del laboratorio.
-2.  Descargue el archivo [JDBCExample.java](https://campusvirtual.escuelaing.edu.co/moodle/pluginfile.php/191340/mod_assign/intro/JDBCExample.java)  y agreguelo en el paquete "edu.eci.cvds.sampleprj.jdbc.example".
-3.  Desde esta clase se realizará una conexión a una base de datos MySQL por medio de JDBC y sus "_Prepared Statements_".
-4.  En un motor de base de datos SQL se tiene un esquema con el siguiente modelo de base de datos (para registrar pedidos sobre productos):
 
-![](img/RMODEL.png)
+### Ciclos de Vida del Desarrollo de Software - CVDS
 
-5.  Revise la documentación de ‘[PreparedStatement](http://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html)’, del API JDBC.
-6.  En la clase **JDBCExample** juste los parámetros de conexión a la base de datos con los datos reales:
-    -   ```
-        Url: jdbc:mysql://desarrollo.is.escuelaing.edu.co:3306/bdprueba 
-		Driver: com.mysql.jdbc.Driver
-		Usuario: bdprueba
-		Contraseña: prueba2019
-        ```
-![](img/Picture5.png)
-        
-7.  Implemente las operaciones faltantes:
-    - nombresProductosPedido
-	![](img/Picture6.png)
-    - valorTotalPedido - El resultado final lo debe retornar la base de datos, no se deben hacer operaciones en memoria.
-	![](img/Picture7.png)
-    - registrarNuevoProducto - Use su código de estudiante para evitar colisiones.
-	![](img/Picture8.png)
-8.  Verifique por medio de un cliente SQL, que la información retornada por el programa coincide con la que se encuentra almacenada en base de datos.
+#### Integración de Capas con Google Guice
 
-![](img/Picture2.png)
+![](https://campusvirtual.escuelaing.edu.co/moodle/pluginfile.php/191971/mod_assign/intro/model.png)
 
-![](img/Picture1.png)
+![](https://campusvirtual.escuelaing.edu.co/moodle/pluginfile.php/191971/mod_assign/intro/cmodel.png)
 
-![](img/Picture4.png)
+# Parte I. Inicio en clase
 
-![](img/Picture3.png)
-
-#### SECCIÓN II. - INTRODUCCIÓN A MYBATIS
-
-1.  Revise la [documentación básica de MyBatis](http://www.mybatis.org/mybatis-3/es/) de forma que entienda para qué sirve y el uso básico que se le puede dar al framework.
-
-2.  Seguir las instrucciones que se encuentran en el repositorio de forma que en la clase **MyBatisExample.java** se creen los mappers necesarios y sea posible realizar la ejecución de diferentes sentencias SQL en la base de datos de pruebas.
-
-
-#### Tecnologías de persistencia - Frameworks de Persistencia - Introducción a MyBatis
-
-
-En este laboratorio se utilizará un 'framework' de persistencia. La base de datos que se utilizará tiene los siguientes parámetros:
-
-	host: desarrollo.is.escuelaing.edu.co
-	puerto: 3306
-	usuario: bdprueba
-	pwd: prueba2019
-	base de datos: bdprueba
-
-![](img/MODEL.png)
-
-## Parte I (Para entregar en clase)
-
-1. Ubique los archivos de configuración para producción de MyBATIS (mybatis-config.xml). Éste está en la ruta donde normalmente se ubican los archivos de configuración de aplicaciones montadas en Maven (src/main/resources). Edítelos y agregue en éste, después de la sección &lt;settings&gt; los siguientes 'typeAliases':
-
-	```xml
-    <typeAliases>
-        <typeAlias type='edu.eci.cvds.samples.entities.Cliente' alias='Cliente'/>
-        <typeAlias type='edu.eci.cvds.samples.entities.Item' alias='Item'/>
-        <typeAlias type='edu.eci.cvds.samples.entities.ItemRentado' alias='ItemRentado'/>
-        <typeAlias type='edu.eci.cvds.samples.entities.TipoItem' alias='TipoItem'/>
-    </typeAliases>	
-    ```
-
-2. Lo primero que va a hacer es configurar un 'mapper' que permita que el framework reconstruya todos los objetos Cliente con sus detalles (ItemsRentados). Para hacer más eficiente la reconstrucción, la misma se realizará a partir de una sola sentencia SQL que relaciona los Clientes, sus Items Rentados, Los Items asociados a la renta, y el tipo de item. Ejecute esta sentencia en un cliente SQL (en las estaciones Linux está instalado EMMA), y revise qué nombre se le está asignando a cada columna del resultado:
-
-	```sql
-		select
-        c.nombre,
-        c.documento,
-        c.telefono,
-        c.direccion,
-        c.email,
-        c.vetado,
-        ir.id ,
-        ir.fechainiciorenta ,
-        ir.fechafinrenta ,
-        i.id ,
-        i.nombre ,
-        i.descripcion ,
-        i.fechalanzamiento ,
-        i.tarifaxdia ,
-        i.formatorenta ,
-        i.genero ,        
-        ti.id ,
-        ti.descripcion 
-        FROM VI_CLIENTES as c 
-        left join VI_ITEMRENTADO as ir on c.documento=ir.CLIENTES_documento 
-        left join VI_ITEMS as i on ir.ITEMS_id=i.id 
-        left join VI_TIPOITEM as ti on i.TIPOITEM_id=ti.id 
-	```
-
-![](img/Picture9.png)
-
-3. Abra el archivo XML en el cual se definirán los parámetros para que MyBatis genere el 'mapper' de Cliente (ClienteMapper.xml). Ahora, mapee un elemento de tipo \<select> al método 'consultarClientes':
-
-	```xml
-   <select parameterType="map" id="consultarClientes" resultMap="ClienteResult">
-   			SENTENCIA SQL
-	</select>
-	```
-
-3. Note que el mapeo hecho anteriormente, se indica que los detalles de a qué atributo corresponde cada columna del resultado de la consulta están en un 'resultMap' llamado "ClienteResult". En el XML del mapeo agregue un elemento de tipo &lt;resultMap&gt;, en el cual se defina, para una entidad(clase) en particular, a qué columnas estarán asociadas cada una de sus propiedades (recuerde que propiedad != atributo). La siguiente es un ejemplo del uso de la sintaxis de &lt;resultMap&gt; para la clase Maestro, la cual tiene una relación 'uno a muchos' con la clase DetalleUno y una relación 'uno a uno' con la clase DetalleDos, y donde -a la vez-, DetalleUno tiene una relación 'uno-a-uno- con DetalleDos:
-
-	```xml
-    <resultMap type='Maestro' id='MaestroResult'>
-        <id property='propiedad1' column='COLUMNA1'/>
-        <result property='propiedad2' column='COLUMNA2'/>
-        <result property='propiedad3' column='COLUMNA3'/>  
-        <association property="propiedad5" javaType="DetalleDos"></association>      
-        <collection property='propiedad4' ofType='DetalleUno'></collection>
-    </resultMap>
-
-    <resultMap type='DetalleUno' id='DetalleUnoResult'>
-        <id property='propiedadx' column='COLUMNAX'/>
-        <result property='propiedady' column='COLUMNAY'/>
-        <result property='propiedadz' column='COLUMNAZ'/> 
-	<association property="propiedadw" javaType="DetalleDos"></association>      
-    </resultMap>
+1.  Actualice el proyecto del taller realizados en el ejercicio anterior. Agregue las clases y excepciones no descritas de ser necesario.
     
-    <resultMap type='DetalleDos' id='DetalleDosResult'>
-        <id property='propiedadr' column='COLUMNAR'/>
-        <result property='propiedads' column='COLUMNAS'/>
-        <result property='propiedadt' column='COLUMNAT'/>        
-    </resultMap>
+2.  Cree la interface `ItemDAO` y utilicela como referencia para realizar los _Objetos de Acceso a los Datos_ (DAO) para las demas entidades:
+    
+    ```
+    package edu.eci.cvds.sampleprj.dao;
+    
+    import edu.eci.cvds.samples.entities.Item;
+    
+    public interface ItemDAO {
+    
+       public void save(Item it) throws PersistenceException;
+    
+       public Item load(int id) throws PersistenceException;
+    
+    }
+    ```
+    
+3.  Usando como referencia la implementación de `ItemDAO`: `MyBATISItemDao`, cree el DAO MyBATIS de las demas entidades:
+    
+    ```
+    package edu.eci.cvds.sampleprj.dao.mybatis;
+    
+    import com.google.inject.Inject;
+    import com.google.inject.Singleton;
+    import edu.eci.cvds.sampleprj.dao.ItemDAO;
+    import edu.eci.cvds.sampleprj.dao.PersistenceException;
+    import edu.eci.cvds.sampleprj.dao.mybatis.mappers.ClienteMapper;
+    import edu.eci.cvds.samples.entities.Item;
+    import edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemMapper;
+    import edu.eci.cvds.samples.entities.TipoItem;
+    import java.sql.SQLException;
+    
+    public class MyBATISItemDAO implements ItemDAO{
+    
+      @Inject
+      private ItemMapper itemMapper;    
+    
+      @Override
+      public void save(Item it) throws PersistenceException{
+      try{
+          itemMapper.insertarItem(it);
+      }
+      catch(org.apache.ibatis.exceptions.PersistenceException e){
+          throw new PersistenceException("Error al registrar el item "+it.toString(),e);
+      }        
+    
+      }
+    
+      @Override
+      public Item load(int id) throws PersistenceException {
+      try{
+          return itemMapper.consultarItem(id);
+      }
+      catch(org.apache.ibatis.exceptions.PersistenceException e){
+          throw new PersistenceException("Error al consultar el item "+id,e);
+      }
+      }
+      }
+    ```
+    
+4.  Cree la interface `ServiciosAlquiler` para los servicios de la capa lógica:
+    
+    ```
+    package edu.eci.cvds.samples.services;
+    
+    import edu.eci.cvds.samples.entities.Cliente;
+    import edu.eci.cvds.samples.entities.Item;
+    import edu.eci.cvds.samples.entities.ItemRentado;
+    import edu.eci.cvds.samples.entities.TipoItem;
+    import java.sql.Date;
+    import java.util.List;
+    
+    public interface ServiciosAlquiler {
+    
+       public abstract int valorMultaRetrasoxDia(int itemId);
+    
+       public abstract Cliente consultarCliente(long docu) throws ExcepcionServiciosAlquiler;
+    
+       /**
+       * @obj Consultar los items que tenga en su poder un cliente
+       * @param idcliente identificador del cliente
+       * @return el litado de detalle de los items rentados por el cliente
+       * identificado con 'idcliente'
+       * @throws ExcepcionServiciosAlquiler si el cliente no esta registrado
+       */
+       public abstract List<ItemRentado> consultarItemsCliente(long idcliente) throws ExcepcionServiciosAlquiler;
+    
+       public abstract List<Cliente> consultarClientes() throws ExcepcionServiciosAlquiler;
+    
+       public abstract Item consultarItem(int id) throws ExcepcionServiciosAlquiler;
+    
+       /**
+       * @obj consultar los items que estan disponibles para alquiler
+       * @return el listado de items disponibles
+       */
+       public abstract List<Item> consultarItemsDisponibles();
+    
+       /**
+       * @obj consultar el valor de la multa del alquiler, dado el id del item
+       * alquilado hasta la fecha dada como parametro
+       * @param iditem el codigo del item alquilado
+       * @param fechaDevolucion la fecha de devolucion del item
+       * @return la multa en funcion del numero de dias de retraso. Si el item se
+       * entrega en la fecha exacta de entrega, o antes, la multa sera cero.
+       * @throws ExcepcionServiciosAlquiler si el item no existe o no esta
+       * actualmente alquilado
+       */
+       public abstract long consultarMultaAlquiler(int iditem, Date fechaDevolucion) throws ExcepcionServiciosAlquiler;
+    
+       public abstract TipoItem consultarTipoItem(int id) throws ExcepcionServiciosAlquiler;
+    
+       public abstract List<TipoItem> consultarTiposItem() throws ExcepcionServiciosAlquiler;
+    
+       /**
+       * @obj rejistrar el alkiler de un item
+       * @pre numdias >=1
+       * @param date fecha de rejistro del alquiler
+       * @param docu identificacion de a quien se le cargara el alquiler
+       * @param item el identificador del item a alquilar
+       * @param numdias el numero de dias que se le prestara el item
+       * @pos el item ya no debe estar disponible, y debe estar asignado al
+       * cliente
+       * @throws ExcepcionXX si el identificador no corresponde con un item, o si
+       * el mismo ya esta alquilado
+       */
+       public abstract void registrarAlquilerCliente(Date date, long docu, Item item, int numdias) throws ExcepcionServiciosAlquiler;
+    
+       public abstract void registrarCliente(Cliente p) throws ExcepcionServiciosAlquiler;
+    
+       /**
+       * @obj consultar el costo del alquiler de un item
+       * @pre numdias >=1
+       * @param iditem el codigo del item
+       * @param numdias el numero de dias que se va a alquilar
+       * @return el costo total del alquiler, teniendo en cuesta el costo diario y
+       * el numeo de dias del alquiler
+       * @throws ExcepcionServiciosAlquiler si el identificador del item no existe
+       */
+       public abstract long consultarCostoAlquiler(int iditem, int numdias) throws ExcepcionServiciosAlquiler;
+    
+       public abstract void actualizarTarifaItem(int id, long tarifa) throws ExcepcionServiciosAlquiler;
+    
+       public abstract void registrarItem(Item i) throws ExcepcionServiciosAlquiler;
+    
+       public abstract void vetarCliente(long docu, boolean estado) throws ExcepcionServiciosAlquiler;
+    
+    }
+    ```
+    
+5.  Realice en la implementación de la capa lógica (ServiciosAlquilerImpl), inyecte los DAO que sean necesarios. Tome de ejemplo el ItemDAO.
+    
+    ```
+    package edu.eci.cvds.samples.services.impl;
+    
+    import com.google.inject.Inject;
+    import com.google.inject.Singleton;
+    import edu.eci.cvds.sampleprj.dao.ClienteDAO;
+    import edu.eci.cvds.sampleprj.dao.ItemDAO;
+    import edu.eci.cvds.sampleprj.dao.PersistenceException;
+    
+    import edu.eci.cvds.samples.entities.Cliente;
+    import edu.eci.cvds.samples.entities.Item;
+    import edu.eci.cvds.samples.entities.ItemRentado;
+    import edu.eci.cvds.samples.entities.TipoItem;
+    import edu.eci.cvds.samples.services.ExcepcionServiciosAlquiler;
+    import edu.eci.cvds.samples.services.ServiciosAlquiler;
+    import java.sql.Date;
+    import java.util.List;
+    
+    @Singleton
+    public class ServiciosAlquilerImpl implements ServiciosAlquiler {
+    
+       @Inject
+       private ItemDAO itemDAO;
+    
+       @Override
+       public int valorMultaRetrasoxDia(int itemId) {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public Cliente consultarCliente(long docu) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public List<ItemRentado> consultarItemsCliente(long idcliente) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public List<Cliente> consultarClientes() throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public Item consultarItem(int id) throws ExcepcionServiciosAlquiler {
+           try {
+               return itemDAO.load(id);
+           } catch (PersistenceException ex) {
+               throw new ExcepcionServiciosAlquiler("Error al consultar el item "+id,ex);
+           }
+       }
+    
+       @Override
+       public List<Item> consultarItemsDisponibles() {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public long consultarMultaAlquiler(int iditem, Date fechaDevolucion) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public TipoItem consultarTipoItem(int id) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public List<TipoItem> consultarTiposItem() throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public void registrarAlquilerCliente(Date date, long docu, Item item, int numdias) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public void registrarCliente(Cliente c) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public long consultarCostoAlquiler(int iditem, int numdias) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+    
+       @Override
+       public void actualizarTarifaItem(int id, long tarifa) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet.");
+       }
+       @Override
+       public void registrarItem(Item i) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       }
+    
+       @Override
+       public void vetarCliente(long docu, boolean estado) throws ExcepcionServiciosAlquiler {
+           throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       }
+    }
+    ```
+    
+6.  Realice la implementación de un servicio Stub (ServiciosAlquilerItemsStub) para que se pueda probar la lógica facilmente sin la capa de persistencia:
+    
+    ```
+    package edu.eci.cvds.samples.services.impl;
+    
+    import edu.eci.cvds.samples.entities.Cliente;
+    import edu.eci.cvds.samples.entities.Item;
+    import edu.eci.cvds.samples.entities.ItemRentado;
+    import edu.eci.cvds.samples.entities.TipoItem;
+    import edu.eci.cvds.samples.services.ExcepcionServiciosAlquiler;
+    import edu.eci.cvds.samples.services.ServiciosAlquiler;
+    
+    import java.io.Serializable;
+    import java.sql.Date;
+    import java.time.LocalDate;
+    import java.time.temporal.ChronoUnit;
+    import java.util.ArrayList;
+    import java.util.HashMap;
+    import java.util.LinkedList;
+    import java.util.List;
+    import java.util.Map;
+    
+    public class ServiciosAlquilerItemsStub implements ServiciosAlquiler {
+    
+       private static final int MULTA_DIARIA=5000;
+       private final static long MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
+    
+       private final Map<Long,Cliente> clientes;
+       private final Map<Integer,Item> itemsDisponibles;
+       private final Map<Integer,ItemRentado> itemsrentados;
+       private final Map<Integer,TipoItem> tipositems;
+    
+       private final Map<Integer,Long> mapaPrestamosPorIdCliente;
+    
+       public ServiciosAlquilerItemsStub() {
+           clientes = new HashMap<>();
+           itemsDisponibles = new HashMap<>();
+           itemsrentados = new HashMap<>();
+           tipositems = new HashMap<>();
+           mapaPrestamosPorIdCliente=new HashMap<>();
+           //poblar();
+       }
+    
+       @Override
+       public int valorMultaRetrasoxDia(int itemId) {
+           return MULTA_DIARIA;
+       }
+    
+       @Override
+       public Cliente consultarCliente(long docu) throws ExcepcionServiciosAlquiler {
+           Cliente c=null;
+           if(clientes.containsKey(docu)){
+               c=clientes.get(docu);
+           }
+           return c;
+       }
+    
+       @Override
+       public List<Cliente> consultarClientes() throws ExcepcionServiciosAlquiler {
+           return  new LinkedList<>(clientes.values());
+       }
+    
+       @Override
+       public void registrarCliente(Cliente p) throws ExcepcionServiciosAlquiler {
+           if (!clientes.containsKey(p.getDocumento())) {
+               clientes.put(p.getDocumento(), p);
+           } else {
+               throw new ExcepcionServiciosAlquiler("El cliente con documento "+p+" ya esta registrado.");
+           }
+       }
+    
+       @Override
+       public void vetarCliente(long docu, boolean estado) throws ExcepcionServiciosAlquiler {
+           if(clientes.containsKey(docu)){
+               Cliente c=clientes.get(docu);
+               c.setVetado(estado);            
+           }
+           else{throw new ExcepcionServiciosAlquiler("Cliente no registrado:"+docu);}
+       }
+    
+       @Override
+       public Item consultarItem(int id) throws ExcepcionServiciosAlquiler {
+           Item i = null;
+           if(itemsDisponibles.containsKey(id)){
+               i=itemsDisponibles.get(id);
+           }
+           else{
+               throw new ExcepcionServiciosAlquiler("Item no registrado:"+id);
+           }                
+           return i;
+       }
+    
+       @Override
+       public List<Item> consultarItemsDisponibles()  {
+           return  new LinkedList<>(itemsDisponibles.values());
+       }
+    
+       @Override
+       public void registrarItem(Item i) throws ExcepcionServiciosAlquiler {
+           if (!itemsDisponibles.containsKey(i.getId())) {
+               itemsDisponibles.put(i.getId(), i);
+           } else {
+               throw new ExcepcionServiciosAlquiler("El item " + i.getId() + " ya esta registrado.");
+           }
+       }
+    
+       @Override
+       public void actualizarTarifaItem(int id, long tarifa) throws ExcepcionServiciosAlquiler {
+           if (!itemsDisponibles.containsKey(id)) {
+               Item c = itemsDisponibles.get(id);
+               c.setTarifaxDia(tarifa);
+               itemsDisponibles.put(id, c);
+           } else {
+               throw new ExcepcionServiciosAlquiler("El item " + id + " no esta registrado.");
+           }
+       }
+    
+       @Override
+       public TipoItem consultarTipoItem(int id) throws ExcepcionServiciosAlquiler {
+           TipoItem i = null;
+           if(!tipositems.containsKey(id)){
+               i=tipositems.get(id);
+           }
+           return i;
+    
+       }
+    
+       @Override
+       public List<TipoItem> consultarTiposItem() throws ExcepcionServiciosAlquiler {
+           return  new LinkedList<>(tipositems.values());
+       }
+    
+       @Override
+       public void registrarAlquilerCliente(Date date,long docu, Item item, int numdias) throws ExcepcionServiciosAlquiler {
+    
+           LocalDate ld=date.toLocalDate();
+           LocalDate ld2=ld.plusDays(numdias);
+    
+           ItemRentado ir=new ItemRentado(0,item,date,java.sql.Date.valueOf(ld2));
+    
+           if (clientes.containsKey(docu)) {
+               Cliente c = clientes.get(docu);
+               c.getRentados().add(ir);
+               itemsDisponibles.remove(ir.getItem().getId());
+               itemsrentados.put(item.getId(), ir);
+               mapaPrestamosPorIdCliente.put(item.getId(),docu);
+           } else {
+               throw new ExcepcionServiciosAlquiler("No existe el cliente con el documento " + docu);
+           }
+       }
+    
+       @Override
+       public List<ItemRentado> consultarItemsCliente(long idcliente) throws ExcepcionServiciosAlquiler{        
+           if (clientes.containsKey(idcliente)) {
+               Cliente c = clientes.get(idcliente);
+               return c.getRentados();            
+           } else {
+               throw new ExcepcionServiciosAlquiler("Cliente no registrado:" + idcliente);
+           }
+    
+       }
+    
+       private Cliente consultarClienteConItem(int iditem) throws ExcepcionServiciosAlquiler{
+           if (mapaPrestamosPorIdCliente.containsKey(iditem)){  
+               long idcli=mapaPrestamosPorIdCliente.get(iditem);
+               if (clientes.containsKey(mapaPrestamosPorIdCliente.get(iditem))){
+                   return clientes.get(idcli);
+               }
+               else{
+                   throw new ExcepcionServiciosAlquiler("El cliente "+idcli+" asociado al "
+                           + "alquiler del item "+iditem+" no esta registrado.");
+               }                        
+           }
+           else{
+              throw new ExcepcionServiciosAlquiler("El item "+iditem+ " no esta alquilado.");
+           }
+       }
+    
+       @Override
+       public long consultarMultaAlquiler(int iditem,Date fechaDevolucion) throws ExcepcionServiciosAlquiler{
+           if (!itemsrentados.containsKey(iditem)){
+               throw new ExcepcionServiciosAlquiler("El item "+iditem+"no esta en alquiler");
+           }
+           else{
+               ItemRentado ir=itemsrentados.get(iditem);
+    
+               LocalDate fechaMinimaEntrega=ir.getFechafinrenta().toLocalDate();
+               LocalDate fechaEntrega=fechaDevolucion.toLocalDate();
+               long diasRetraso = ChronoUnit.DAYS.between(fechaMinimaEntrega, fechaEntrega);
+               return diasRetraso*MULTA_DIARIA;
+           }
+       }
+    
+       @Override
+       public long consultarCostoAlquiler(int iditem, int numdias) throws ExcepcionServiciosAlquiler {
+           if (!itemsDisponibles.containsKey(iditem)) {
+               throw new ExcepcionServiciosAlquiler("El item " + iditem + " no esta disponible.");
+           } else {
+               return itemsDisponibles.get(iditem).getTarifaxDia()*numdias;
+           }
+    
+       }
+    
+       private void poblar() {
+    
+           TipoItem ti1=new TipoItem(1,"Video");
+           TipoItem ti2=new TipoItem(2,"Juego");
+           TipoItem ti3=new TipoItem(3,"Musica");
+           tipositems.put(1,ti1);
+           tipositems.put(2,ti2);
+           tipositems.put(3,ti3);
+    
+           Item i1=new Item(ti1, 1, "Los 4 Fantasticos", "Los 4 Fantásticos  es una película de superhéroes  basada en la serie de cómic homónima de Marvel.", java.sql.Date.valueOf("2005-06-08"), 2000, "DVD", "Ciencia Ficcion");
+           Item i2=new Item(ti2, 2, "Halo 3", "Halo 3 es un videojuego de disparos en primera persona desarrollado por Bungie Studios.", java.sql.Date.valueOf("2007-09-08"), 3000, "DVD", "Shooter");
+           Item i3=new Item(ti3, 3, "Thriller", "Thriller es una canción interpretada por el cantante estadounidense Michael Jackson, compuesta por Rod Temperton y producida por Quincy Jones.", java.sql.Date.valueOf("1984-01-11"), 2000, "DVD", "Pop");
+           Item i4=new Item(ti1, 4, "Los 4 Fantasticos", "Los 4 Fantásticos  es una película de superhéroes  basada en la serie de cómic homónima de Marvel.", java.sql.Date.valueOf("2005-06-08"), 2000, "DVD", "Ciencia Ficcion");
+           Item i5=new Item(ti2, 5, "Halo 3", "Halo 3 es un videojuego de disparos en primera persona desarrollado por Bungie Studios.", java.sql.Date.valueOf("2007-09-08"), 3000, "DVD", "Shooter");
+           Item i6=new Item(ti3, 6, "Thriller", "Thriller es una canción interpretada por el cantante estadounidense Michael Jackson, compuesta por Rod Temperton y producida por Quincy Jones.", java.sql.Date.valueOf("1984-01-11"), 2000, "DVD", "Pop");
+           //items.put(1, i1);
+           //items.put(2, i2);
+           //items.put(3, i3);
+           itemsDisponibles.put(4, i4);
+           itemsDisponibles.put(5, i5);
+           itemsDisponibles.put(6, i6);
+    
+           ItemRentado ir1=new ItemRentado(0,i1, java.sql.Date.valueOf("2017-01-01"), java.sql.Date.valueOf("2017-03-12"));
+           ItemRentado ir2=new ItemRentado(0,i2, java.sql.Date.valueOf("2017-01-04"), java.sql.Date.valueOf("2017-04-7"));
+           ItemRentado ir3=new ItemRentado(0,i1, java.sql.Date.valueOf("2017-01-07"), java.sql.Date.valueOf("2017-07-12"));
+    
+           ArrayList<ItemRentado> list1 = new ArrayList<>();
+           list1.add(ir1);
+           ArrayList<ItemRentado> list2 = new ArrayList<>();
+           list2.add(ir2);
+           ArrayList<ItemRentado> list3 = new ArrayList<>();
+           list3.add(ir3);
+    
+           Cliente c1=new Cliente("Oscar Alba", 1026585664, "6788952", "KRA 109#34-C30", "oscar@hotmail.com", false,list1);
+           Cliente c2=new Cliente("Carlos Ramirez", 1026585663, "6584562", "KRA 59#27-a22", "carlos@hotmail.com", false,list2);
+           Cliente c3=new Cliente("Ricardo Pinto", 1026585669, "4457863", "KRA 103#94-a77", "ricardo@hotmail.com", false,list3);
+           clientes.put(c1.getDocumento(), c1);
+           clientes.put(c2.getDocumento(), c2);
+           clientes.put(c3.getDocumento(), c3);
+    
+       }
+    }
+    ```
+    
+7.  Cree la clase ServiciosAlquilerFactory para que además de hacer ‘bind’ de la interfaz ServiciosAlquier con la implementación ServiciosAlquilerImpl, haga ‘bind’ de las entidades, por ejemplo, para `ItemDAO` se asocia con `MyBATISItemDAO`.
+    
+    ```
+    package edu.eci.cvds.samples.services;
+    
+    import com.google.inject.Injector;
+    import edu.eci.cvds.sampleprj.dao.ClienteDAO;
+    import edu.eci.cvds.sampleprj.dao.ItemDAO;
+    import edu.eci.cvds.sampleprj.dao.TipoItemDAO;
+    import edu.eci.cvds.sampleprj.dao.mybatis.MyBATISClienteDAO;
+    import edu.eci.cvds.sampleprj.dao.mybatis.MyBATISItemDAO;
+    import edu.eci.cvds.sampleprj.dao.mybatis.MyBATISTipoItemDAO;
+    import edu.eci.cvds.samples.services.impl.ServiciosAlquilerItemsImpl;
+    import org.apache.ibatis.transaction.TransactionFactory;
+    import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+    import org.mybatis.guice.XMLMyBatisModule;
+    
+    import java.util.Optional;
+    
+    import static com.google.inject.Guice.createInjector;
+    
+    public class ServiciosAlquilerFactory {
+    
+       private static ServiciosAlquilerFactory instance = new ServiciosAlquilerFactory();
+    
+       private static Optional<Injector> optInjector;
+    
+       private Injector myBatisInjector(String env, String pathResource) {
+           return createInjector(new XMLMyBatisModule() {
+               @Override
+               protected void initialize() {
+                   setEnvironmentId(env);
+                   setClassPathResource(pathResource);
+                   bind(ItemDAO.class).to(MyBATISItemDAO.class);
+                   bind(ServiciosAlquiler.class).to(ServiciosAlquilerItemsImpl.class);
+               }
+           });
+       }
+    
+       private ServiciosAlquilerFactory(){
+           optInjector = Optional.empty();
+       }
+    
+       public ServiciosAlquiler getServiciosAlquiler(){
+           if (!optInjector.isPresent()) {
+               optInjector = Optional.of(myBatisInjector("development","mybatis-config.xml"));
+           }
+    
+           return optInjector.get().getInstance(ServiciosAlquiler.class);
+       }
+    
+    
+       public ServiciosAlquiler getServiciosAlquilerTesting(){
+           if (!optInjector.isPresent()) {
+               optInjector = Optional.of(myBatisInjector("test","mybatis-config-h2.xml"));
+           }
+    
+           return optInjector.get().getInstance(ServiciosAlquiler.class);
+       }
+    
+    
+       public static ServiciosAlquilerFactory getInstance(){
+           return instance;
+       }
+    
+    }
+    ```
+    
+8.  Pruebe el programa ‘Main’ suministrado, y con este rectifique que a través de la capa lógica se pueda consultar un cliente.
+    
+9.  Implemente los métodos que sean necesarios en las interfaces de las entidades (DAO) y en sus implementaciones haciendo uso del DAO inyectado. Haga un programa para comprobar que la consulta de un cliente se haga correctamente, a través de la capa lógica.
+    
 
-	```
+# Parte II - Pruebas
 
-	Como observa, Para cada propiedad de la clase se agregará un elemento de tipo &lt;result&gt;, el cual, en la propiedad 'property' indicará el nombre de la propiedad, y en la columna 'column' indicará el nombre de la columna de su tabla correspondiente (en la que se hará persistente). En caso de que la columna sea una llave primaria, en lugar de 'result' se usará un elemento de tipo 'id'. Cuando la clase tiene una relación de composición con otra, se agrega un elemento de tipo &lt;association&gt;.Finalmente, observe que si la clase tiene un atributo de tipo colección (List, Set, etc), se agregará un elemento de tipo &lt;collection&gt;, indicando (en la propiedad 'ofType') de qué tipo son los elementos de la colección. En cuanto al indentificador del 'resultMap', como convención se suele utilizar el nombre del tipo de dato concatenado con 'Result' como sufijo.
-	
-	Teniendo en cuenta lo anterior, haga cuatro 'resultMap': uno para la clase Cliente, otro para la clase ItemRentado, otro para la clase Item, y otro para la clase TipoItem. 
+1.  Implemente las operaciones de la lógica que hagan falta para satisfacer los requerimientos para la capa de presentación, teniendo en cuenta, que puede requerir agregar más operaciones a los DAOs -y por ende- más mappers de MyBATIS.
+    
+2.  Tenga en cuenta: las operaciones que impliquen registrar o actualizar registros, demarcar la transaccionalidad con la anotación @Transactional.
+    
+3.  Cree el archivo de configuracion de la base de datos de pruebas que es de tipo `h2`, en el directorio `src/main/resources`:
+    
+    ```
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+    <configuration>
+    
+       <typeAliases>
+           <typeAlias type='edu.eci.cvds.samples.entities.Cliente' alias='Cliente'/>
+           <typeAlias type='edu.eci.cvds.samples.entities.Item' alias='Item'/>
+           <typeAlias type='edu.eci.cvds.samples.entities.ItemRentado' alias='ItemRentado'/>
+           <typeAlias type='edu.eci.cvds.samples.entities.TipoItem' alias='TipoItem'/>
+       </typeAliases>
+    
+       <environments default="test">
+           <environment id="test">
+               <transactionManager type="JDBC" />
+               <dataSource type="POOLED">
+                   <property name="driver" value="org.h2.Driver" />
+                   <property name="url" value="jdbc:h2:file:./target/db/testdb;MODE=MYSQL" />
+                   <property name="username" value="sa" />
+                   <property name="password" value="" />
+               </dataSource>
+           </environment>
+       </environments>
+    
+       <mappers>
+           <mapper resource="mappers/ClienteMapper.xml"></mapper>
+           <mapper resource="mappers/ItemMapper.xml"></mapper>
+           <mapper resource="mappers/ItemRentadoMapper.xml"></mapper>
+           <mapper resource="mappers/TipoItemMapper.xml"></mapper>
+       </mappers> 
+    
+    </configuration>
+    ```
+    
+4.  Cree un archivo de pruebas
+    
+    ```
+    package edu.eci.cvds.test;
+    
+    import java.util.ArrayList;
+    import java.util.List;
+    
+    import com.google.inject.Inject;
+    import edu.eci.cvds.sampleprj.dao.PersistenceException;
+    import edu.eci.cvds.samples.entities.Cliente;
+    import edu.eci.cvds.samples.entities.ItemRentado;
+    import edu.eci.cvds.samples.services.ExcepcionServiciosAlquiler;
+    import edu.eci.cvds.samples.services.ServiciosAlquiler;
+    import edu.eci.cvds.samples.services.ServiciosAlquilerFactory;
+    import org.apache.ibatis.session.SqlSession;
+    import org.junit.Before;
+    import org.junit.Test;
+    import org.junit.Assert;
+    
+    public class ServiciosAlquilerTest {
+    
+        @Inject
+        private SqlSession sqlSession;
+    
+        ServiciosAlquiler serviciosAlquiler;
+    
+        public ServiciosAlquilerTest() {
+            serviciosAlquiler = ServiciosAlquilerFactory.getInstance().getServiciosAlquilerTesting();
+        }
+    
+        @Before
+        public void setUp() {
+        }
+    
+        @Test
+        public void emptyDB() {
+            for(int i = 0; i < 100; i += 10) {
+                boolean r = false;
+                try {
+                    Cliente cliente = serviciosAlquiler.consultarCliente(documento);
+                } catch(ExcepcionServiciosAlquiler e) {
+                    r = true;
+                } catch(IndexOutOfBoundsException e) {
+                    r = true;
+                }
+                // Validate no Client was found;
+                Assert.assertTrue(r);
+            };
+        }
+    }
+    ```
+    
 
-5. Una vez haya hecho lo anterior, es necesario que en el elemento &lt;collection&gt; del maestro se agregue una propiedad que indique cual es el 'resultMap' a través del cual se podrá 'mapear' los elementos contenidos en dicha colección. Para el ejemplo anterior, como la colección contiene elementos de tipo 'Detalle', se agregará el elemento __resultMap__ con el identificador del 'resultMap' de Detalle:
+Cree diferentes pruebas utilizando las clases de equivalencia necesarias para las diferentes operaciones definidas en los servicios.
 
-	```xml
-	<collection property='propiedad3' ofType='Detalle' resultMap='DetalleResult'></collection>
-	```
+# Parte III - Capa Presentación
 
-	Teniendo en cuenta lo anterior, haga los ajustes correspondientes en la configuración para el caso del modelo de Alquiler de películas.
+1.  Realice los cambios necesarios en el archivo pom.xml de tal forma que el proyecto se construya de manera correcta como una aplicación WEB, incluyendo las dependencias (jstl, jsf-api, jsf-impl, primefaces, etc) y los plugins (maven war, tomcat7 maven, etc.).
+    
+2.  Agregue el archivo web.xml requerido con la configuración necesaria. Al final del archivo agregue el siguiente listener:
+    
+    ```
+    <listener>
+        <listener-class>edu.eci.cvds.guice.GuiceContextListener</listener-class>
+    </listener>
+    ```
+    
+3.  Cree el listener con el paquete y nombre indicados de forma que se asocie la configuración de Guice y MyBatis a la inicialización del contexto de la aplicación en el servidor tomcat7 embebido, con el siguiente contenido inicial, resolviendo el ‘TODO’ (asociando la interfaz del servicio a la implementación Stub):
+    
+    ```
+    package edu.eci.cvds.guice;
+    
+    import javax.servlet.ServletContext;
+    import javax.servlet.ServletContextEvent;
+    import javax.servlet.ServletContextListener;
+    import org.mybatis.guice.XMLMyBatisModule;
+    import org.mybatis.guice.datasource.helper.JdbcHelper;
+    import com.google.inject.Guice;
+    import com.google.inject.Injector;
+    
+    public class GuiceContextListener implements ServletContextListener {
+    
+        public void contextDestroyed(ServletContextEvent servletContextEvent) {
+            ServletContext servletContext = servletContextEvent.getServletContext();
+            servletContext.removeAttribute(Injector.class.getName());
+        }
+    
+        public void contextInitialized(ServletContextEvent servletContextEvent) {
+            Injector injector = Guice.createInjector(new XMLMyBatisModule() {
+                @Override
+                protected void initialize() {
+                    install(JdbcHelper.MySQL);
+                    setEnvironmentId("development");
+                    setClassPathResource("mybatis-config.xml");
+    
+                    // TODO Add service class associated to Stub implementation
+                    bind(AAA.class).to(YYY.class);
+                    bind(BBB.class).to(ZZZ.class);
+                }
+            });
+    
+            servletContextEvent.getServletContext().setAttribute(Injector.class.getName(), injector);
+        }
+    }
+    ```
+    
+4.  Cree el bean BasePageBean en el paquete “edu.eci.cvds.view” con el siguiente contenido para que se puedan inyectar los componentes necesarios en todas las clases “hijas” que serán los beans de la capa de presentación:
+    
+    ```
+    package edu.eci.cvds.view;
+    
+    import java.io.Serializable;
+    import javax.annotation.PostConstruct;
+    import javax.faces.context.FacesContext;
+    import javax.servlet.ServletContext;
+    import com.google.inject.Injector;
+    
+    public abstract class BasePageBean implements Serializable {
+    
+        private Injector injector;
+    
+        public Injector getInjector() {
+            if (injector == null) {
+                ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext()
+                        .getContext();
+                injector = (Injector) servletContext.getAttribute(Injector.class.getName());
+            }
+            return injector;
+        }
+    
+        public void setInjector(Injector injector) {
+            this.injector = injector;
+        }
+    
+        @PostConstruct
+        public void init() {
+            getInjector().injectMembers(this);
+        }
+    }
+    ```
+    
+5.  Implementar la aplicación Web que permita agregar nuevos clientes a la videotienda, y registrar alquileres para los mismos. Ambas funcionalidades estarán en dos vistas diferentes (registrocliente.xhtml, registroalquiler.xhtml), de acuerdo con las siguientes especificaciones (tenga en cuenta que, por ahora, la aplicación no maneja ningún esquema de autenticación):
+    
+    1.  La vista de ‘registro de clientes’ debe (1) mostrar el listado paginado de los clientes registrados hasta el momento (con la opción de selecciar de uno de éstos), y (2) debe mostrar los campos para poder registrar un nuevo cliente (con su respectivo botón de registro). Cuando se registre un nuevo cliente, se deberá mostrar automáticamente el nuevo cliente en la parte superior.
+    2.  Cuando se seleccione uno de los usuarios ya creados, se debe redirigir al usuario a la vista de ‘registro de alquileres’. En esta vista, dado el cliente seleccionado, se debe (1) mostrar los items que no ha regresado, junto con el valor de la multa total asociada a los mismos a la fecha (fecha del sistema), y (2), debe permtir registrar un nuevo alquiler ingresando el código del item (asumiendo que éste se ingresará con un lector de código de barras), el número de días del alquiler, y mostrando el costo del alquiler antes de su confirmación. En el momento que se confirme, se debe volver a la página anterior (registro de clientes).
+    3.  Ambas vistas se basarán en el ManagedBean de sesión ‘AlquilerItemsBean’ que debe extender ‘BasePageBean’, el cual -a su vez- hace uso de la interfaz ‘ServiciosAlquiler’ (no agregar directamente una implementación concreta, esto se realizará en la configuración de Guice).
+    4.  El desarrollo de ambas vistas debe quedar distribuido entre los dos desarrolladores de la siguiente manera:
+        
+        -   Desarrollador 1: Vista registro de cliente.
+        -   Desarrollador 2: Vista registro de alquiler.
+        -   Desarrollador 1 y 2: ManagedBean ‘AlquilerItemsBean’.
+        -   Cada integrante debe realizar su propio commit pues después se verificarán los cambios de cada uno.
+    
+    Nota. Para ver cómo navegar entre vistas con JSF revise [este enlace.](http://www.tutorialspoint.com/jsf/jsf_page_navigation.htm)
+    
+6.  Construya y despliegue la aplicación con el comando `mvn tomcat7:run` y realice pruebas de la presentación, que debe estar funcionando correctamente, con la implementación ‘Stub’ del servicio de alquiler.
+    
+7.  Modifique la configuración de Guice para asociar a la interfaz, el servicio concreto de alquileres, de forma que todos los cambios que se realicen en la presentación, se actualicen en base de datos de manera correcta.
+    
+8.  Realice los ajustes necesarios para que la aplicación funcione de manera correcta y se asegure que todos los métodos están realizando las operaciones sobre la base de datos.
+    
 
-	
-7. Si intenta utilizar el 'mapper' tal como está hasta ahora, se puede presentar un problema: qué pasa si las tablas a las que se les hace JOIN tienen nombres de columnas iguales?... Con esto MyBatis no tendría manera de saber a qué atributos corresponde cada una de las columnas. Para resolver esto, si usted hace un query que haga JOIN entre dos o más tablas, siempre ponga un 'alias' con un prefijo el query. Por ejemplo, si se tiene
+# Parte IV - Entrega Continua
 
-	```sql	
-	select ma.propiedad1, det.propiedad1 ....
-	```	
+1.  Realice toda la configuración necesaria de CircleCI y Heroku para que la aplicación se construya y despliegue de manera automática cada que se realice un commit al repositorio.
+    
+2.  Realice también todas las configuraciones necesarias de Codacy y los ajustes necesarios para obtener una calificación satisfactoria.
+    
+3.  Verifique que la aplicación se despliegue correctamente en Heroku y sea completamente funcional, tal como se encontraba en local.
+    
+4.  Agregue en el Readme los enlaces necesarios a Heroku, Codacy, etc. para que se pueda verificar el correcto funcionamiento de toda la aplicación.
 
-	Se debería cambiar a:
+# Entrega:
 
-	```sql		
-	select ma.propiedad1, det.propiedad1 as detalle_propiedad1
-	```
-
-	Y posteriormente, en la 'colección' o en la 'asociación' correspondiente en el 'resultMap', indicar que las propiedades asociadas a ésta serán aquellas que tengan un determinado prefijo:
-
-
-	```xml
-    <resultMap type='Maestro' id='MaestroResult'>
-        <id property='propiedad1' column='COLUMNA1'/>
-        <result property='propiedad2' column='COLUMNA2'/>
-        <result property='propiedad3' column='COLUMNA3'/>        
-        <collection property='propiedad4' ofType='Detalle' columnPrefix='detalle_'></collection>
-    </resultMap>
-	```
-	Haga los ajustes necesarios en la consulta y en los 'resultMap' para que no haya inconsistencias de nombres.
-
-
-8. Use el programa de prueba suministrado (MyBatisExample) para probar cómo a través del 'mapper' generado por MyBatis, se puede consultar un Cliente. 
-
-	```java	
-	...
-	SqlSessionFactory sessionfact = getSqlSessionFactory();
-	SqlSession sqlss = sessionfact.openSession();
-	ClientMapper cm=sqlss.getMapper(ClienteMapper.class);
-	System.out.println(cm.consultarClientes()));
-	...
-	```
-
-
-## Parte II (para el Miércoles)
-
-1. Configure en el XML correspondiente, la operación consultarCliente(int id) del 'mapper' ClienteMapper.
-
-	En este caso, a diferencia del método anterior (cargar todos), el método asociado al 'mapper' tiene parámetros que se deben usar en la sentencia SQL. Es decir, el parámetro 'id' de  _public Cliente consultarCliente(int id);_ se debe usar en el WHERE de su correspondiente sentencia SQL. Para hacer esto tenga en cuenta:
-
-	* Agregue la anotación @Param a dicho parámetro, asociando a ésta el nombre con el que se referirá en la sentencia SQL:
-
-	```java
-		public Cliente consultarCliente(@Param("idcli") int id);
-	
-	```
-
-	* Al XML (\<select>, \<insert>, etc) asociado al método del mapper, agregue la propiedad _parameterType="map"_ .
-	* Una vez hecho esto, podrá hacer referencia dentro de la sentencia SQL a este parámetro a través de: #{idcli}
-
-2. Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
-
-![](img/Picture14.png)
-
-3. Configure en el XML correspondiente, la operación agregarItemRentadoACliente. Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
-
-4. Configure en el XML correspondiente (en este caso ItemMapper.xml) la operación 'insertarItem(Item it). Para este tenga en cuenta:
-	* Al igual que en en los dos casos anteriores, el query estará basado en los parámetros ingresados (en este caso, un objeto Item). En este caso, al hacer uso de la anotación @Param, la consulta SQL se podrá componer con los atributos de dicho objeto. Por ejemplo, si al paramétro se le da como nombre ("item"): __insertarItem(@Param("item")Item it)__, en el query se podría usar #{item.id}, #{item.nombre}, #{item.descripcion}, etc. Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
-	
-5. 	Configure en el XML correspondiente (de nuevo en ItemMapper.xml) las operaciones 'consultarItem(int it) y 'consultarItems()' de ItemMapper. En este caso, tenga adicionalmente en cuenta:
-	* Para poder configurar dichas operaciones, se necesita el 'resultMap' definido en ClientMapper. Para evitar tener CODIGO REPETIDO, mueva el resultMap _ItemResult_ de ClienteMapper.xml a ItemMapper.xml. Luego, como dentro de ClienteMapper el resultMap _ItemRentadoResult_ requiere del resultMap antes movido, haga referencia al mismo usando como referencia absoluta en 'namespace' de ItemMapper.xml:
-
-	```xml	
-	<resultMap type='ItemRentado' id="ItemRentadoResult">            
-		<association ... resultMap='edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemMapper.ItemResult'></association> 
-	</resultMap>
-	```
-![](img/Picture12.png)
-![](img/Picture10.png)
-![](img/Picture13.png)
-![](img/Picture11.png)
-
-Verifique el funcionamiento haciendo una consulta a través del 'mapper' desde MyBatisExample.
+1.  En los ‘logs’ de GitHub debe quedar evidencia de los ‘commit’ realizados por cada autor, y en computadores diferentes (esto es verificable). Para esto, no olvide configurar su usuario antes de hacer los commits:
+    
+    ```
+    $ git config --global user.name "John Doe"
+    $ git config --global user.email johndoe@example.com
+    ```
+    
+2.  Subir en el espacio de moodle la URL del repositorio en GitHUB.
