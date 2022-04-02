@@ -32,11 +32,12 @@ public class MyBATISItemRentadoDAO implements ItemRentadoDAO {
         }
     }
 
+    @Override
     public List<ItemRentado> totalItemsRentados() throws PersistenceException {
         try{
             return itemRentadoMapper.totalItemsRentados();
         }catch(org.apache.ibatis.exceptions.PersistenceException e){
-            throw new PersistenceException("Error al consultar el itemRentado ",e);
+            throw new PersistenceException("Error al consultar items rentados ",e);
         }
     }
 }

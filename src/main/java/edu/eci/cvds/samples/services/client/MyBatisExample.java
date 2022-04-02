@@ -30,6 +30,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import edu.eci.cvds.sampleprj.dao.mybatis.mappers.ClienteMapper;
 import edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemMapper;
 import edu.eci.cvds.sampleprj.dao.mybatis.mappers.TipoItemMapper;
+import edu.eci.cvds.sampleprj.dao.mybatis.mappers.ItemRentadoMapper;
 import edu.eci.cvds.samples.entities.Item;
 import edu.eci.cvds.samples.entities.TipoItem;
 
@@ -75,6 +76,7 @@ public class MyBatisExample {
             ClienteMapper cm=sqlss.getMapper(ClienteMapper.class);
             ItemMapper itemMapper = sqlss.getMapper(ItemMapper.class);
             TipoItemMapper tipoItemMapper = sqlss.getMapper(TipoItemMapper.class);
+            ItemRentadoMapper iRMapper = sqlss.getMapper(ItemRentadoMapper.class);
 
             /**CONSULTAR CLIENTES */
             System.out.println("------------------------------------------------\n");
@@ -99,6 +101,10 @@ public class MyBatisExample {
             /**CONSULTAR TIPO ITEM */
             System.out.println("------------------------------------------------\n");
             System.out.println(tipoItemMapper.getTipoItem(2143447));
+
+            /**CONSULTAR ITEMS RENTADOS */
+            System.out.println("------------------------------------------------\n");
+            System.out.println(iRMapper.totalItemsRentados());
             
             /** AGREGAR TIPO ITEM */
             //tipoItemMapper.addTipoItem("La Lechona Mecanica");
