@@ -34,7 +34,7 @@ public class MyBATISItemRentadoDAO implements ItemRentadoDAO {
 
     public List<ItemRentado> totalItemsRentados() throws PersistenceException {
         try{
-            return itemRentadoMapper.TotalRentado();
+            return itemRentadoMapper.totalItemsRentados();
         }catch(org.apache.ibatis.exceptions.PersistenceException e){
             throw new PersistenceException("Error al consultar el itemRentado ",e);
         }

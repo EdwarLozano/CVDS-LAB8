@@ -16,7 +16,11 @@
 
   <select parameterType="map" id="getTipoItem" resultMap="TipoItemResult">
     select * from VI_TIPOITEM where id = #{id}
-  </select>       
+  </select>  
+
+  <select parameterType="map" id="getTiposItems" resultMap="TipoItemResult">
+    select * from VI_TIPOITEM 
+  </select>     
 
                 
 </mapper>

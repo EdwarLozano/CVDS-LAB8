@@ -1,46 +1,42 @@
 package edu.eci.cvds.sampleprj.dao.mybatis;
 
+import java.util.List;
+
 import edu.eci.cvds.sampleprj.dao.PersistenceException;
 import edu.eci.cvds.sampleprj.dao.TipoItemDAO;
 import edu.eci.cvds.sampleprj.dao.mybatis.mappers.TipoItemMapper;
 import edu.eci.cvds.samples.entities.TipoItem;
 
-import java.util.List;
-
-
-import com.google.inject.Inject;
-
-
 public class MyBATISTipoItemDAO implements TipoItemDAO {
-    @Inject
-    private TipoItemMapper tipoItemMapper;
+
+    private TipoItemMapper TIM;
 
     @Override
-    public List<TipoItem> loadTiposItems() throws PersistenceException {
-        try{
-            return tipoItemMapper.getTiposItems();
-        } catch(org.apache.ibatis.exceptions.PersistenceException e){
-            throw new PersistenceException("Error al consultar los tipo items",e);
-        }
-
-    }
-
-    @Override
-    public TipoItem load(int id) throws PersistenceException {
+    public List<TipoItem> getTiposItems() throws PersistenceException {
         try {
-            return tipoItemMapper.getTipoItem(id);
+            return TIM.getTiposItems();
         } catch (org.apache.ibatis.exceptions.PersistenceException e) {
-            throw new PersistenceException("Error al consultar el item por el id"+id,e);
+            throw new PersistenceException("Error al consultar tipos de items ", e);
         }
     }
 
     @Override
-    public void save(TipoItem tipoItem) throws PersistenceException {
+    public TipoItem getTipoItem(int id) throws PersistenceException {
         try {
-            tipoItemMapper.addTipoItem(tipoItem.toString());
+            return TIM.getTipoItem(id);
         } catch (org.apache.ibatis.exceptions.PersistenceException e) {
-            throw new PersistenceException("Error al agregar el nuevo tipo item",e);
+            throw new PersistenceException("Error al consultar tipo de item con id " + id, e);
         }
     }
-    
+
+    @Override
+    public void addTipoItem(String des) throws PersistenceException {
+        try {
+            TIM.addTipoItem(des);
+        } catch (org.apache.ibatis.exceptions.PersistenceException e) {
+            throw new PersistenceException("Error al añadir tipo de item con id" + des, e);
+        }
+
+    }
+
 }
