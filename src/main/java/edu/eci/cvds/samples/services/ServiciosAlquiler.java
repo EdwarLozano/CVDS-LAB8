@@ -80,5 +80,4 @@ public interface ServiciosAlquiler {
    public abstract void registrarItem(Item i) throws ExcepcionServiciosAlquiler;
 
    public abstract void vetarCliente(long docu, boolean estado) throws ExcepcionServiciosAlquiler;
-
 }
