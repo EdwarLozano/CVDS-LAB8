@@ -818,3 +818,9 @@ Cree diferentes pruebas utilizando las clases de equivalencia necesarias para la
     ```
     
 2.  Subir en el espacio de moodle la URL del repositorio en GitHUB.
+
+
+[![CircleCI](https://circleci.com/gh/EdwarLozano/CVDS-LAB8/tree/master.svg?style=svg)](https://circleci.com/gh/EdwarLozano/CVDS-LAB8/tree/master)
+
+
+https://bdreader.herokuapp.com/
