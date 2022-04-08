@@ -819,6 +819,7 @@ Cree diferentes pruebas utilizando las clases de equivalencia necesarias para la
     
 2.  Subir en el espacio de moodle la URL del repositorio en GitHUB.
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1ff2e03dc1cb4d9793eb639c419b305f)](https://www.codacy.com/gh/EdwarLozano/CVDS-LAB8/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdwarLozano/CVDS-LAB8&amp;utm_campaign=Badge_Grade)
 
 [![CircleCI](https://circleci.com/gh/EdwarLozano/CVDS-LAB8/tree/master.svg?style=svg)](https://circleci.com/gh/EdwarLozano/CVDS-LAB8/tree/master)
 
