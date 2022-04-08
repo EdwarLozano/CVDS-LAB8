@@ -94,15 +94,15 @@
             </p:dataTable>
             <div class="gri">
                 <h1> Documento</h1>
-                <p:inputText id="Documento" type="long" binding="#{doc}" />
+                <p:inputText class = "input" id="Documento" type="long" binding="#{doc}" />
                 <h1>Nombre</h1>
-                <p:inputText id="Nombre" type="String" binding="#{name}"/>
+                <p:inputText class = "input" id="Nombre" type="String" binding="#{name}"/>
                 <h1>Telefono</h1>
-                <p:inputText id="Telefono" type="String" binding="#{tele}"/>
+                <p:inputText class = "input" id="Telefono" type="String" binding="#{tele}"/>
                 <h1>Direccion</h1>
-                <p:inputText id="Direccion" type="String" binding="#{dir}"/>
+                <p:inputText class = "input" id="Direccion" type="String" binding="#{dir}"/>
                 <h1>Email</h1>
-                <p:inputText id="Email" type="String" binding="#{mail}"/>
+                <p:inputText class = "input" id="Email" type="String" binding="#{mail}"/>
             </div>
             <p:commandButton update="formRegisterCliente" class="botn" value="Registrar" actionListener="#{Alquiler.insertarCliente(name.value, doc.value, tele.value, dir.value, mail.value)}"/>
         </h:form>

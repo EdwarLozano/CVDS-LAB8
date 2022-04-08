@@ -6,11 +6,10 @@
 
       <style>
         .page{
-            padding: 10%;
+            padding: 5%;
             font-family: 'Trebuchet MS', Courier, monospace;
             background-color: rgb(255, 211, 117);
             color: white;
-            display: flex;
         }
         .formbox{
             border-radius: 8px ;
@@ -38,24 +37,22 @@
             align-content: center;
             
         }
-
+        h1 {text-align: center; font-size:250%}
     </style>
 
-    <h:head>
-        <title>Zona de Alquiler</title>
-    </h:head>
     <h:body class="page">
-        <p:outputLabel value="Registro Alquiler"/>
+        <h1> Zona de Alquiler</h1>
+        <h2> Registro Alquiler</h2>
         <h:form id="rentForm" class = "formbox">
             <p:outputLabel value="#{Alquiler.seleccionado.nombre}"/><br></br>
             <p>Items Rentados</p><br></br>
             <p:dataTable value="#{Alquiler.rentados}" var="itmRentado" class="table">
-                <h:column headerText="Id Item Rentado">
-                    <p:outputLabel value="#{itmRentado.item.id}"/>
+                <h:column headerText="Id Item Rentado" >
+                    <p:outputLabel value="#{itmRentado.item.id}" style="font-size: 55px;"> </p:outputLabel>/>
             </h:column>
                 <h:column headerText="Nombre del Item">
                     <p:outputLabel value="#{itmRentado.item.nombre}"/>
-        </h:column>
+            </h:column>
             </p:dataTable>
             <br></br><p:outputLabel value="Se tiene una Multa de: "/> <p:outputLabel value="#{Alquiler.multa}"/>
             <br></br>
@@ -75,11 +72,8 @@
                 <h:column headerText="Nombre">
                     <p:outputLabel value="#{available.nombre}"/>
                 </h:column>
-            </p:dataTable>
-            
-            <br><p:commandButton update="rentForm" class ="botn" value="Back" action="#{navigationController.paginaCliente()}"/></br>
-
-            
+            </p:dataTable>       
+            <br><p:commandButton update="rentForm" class ="botn" value="Back" action="#{navigationController.paginaCliente()}"/></br>  
         </h:form>
     </h:body>
 </html>
